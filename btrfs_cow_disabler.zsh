@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/bin/zsh
+
+# Exit on any error
+set -e
 
 # Add usage message
 if [ $# -ne 2 ]; then
@@ -30,31 +33,65 @@ if [ -d "$FILE" ]; then
         if [ -f "$f" ]; then
             echo "Converting file $f..."
             TMP_FILE="${TMP}_$(basename "$f")"
+            original_hash=$(get_sha256 "$f")
             touch "$TMP_FILE"
             chattr +C "$TMP_FILE"
+            
             if ! dd if="$f" of="$TMP_FILE" bs=1M status=progress; then
                 echo "Error: Failed to copy $f" >&2
                 rm -f "$TMP_FILE"
                 exit 1
             fi
-            rm -f "$f"
-            mv "$TMP_FILE" "$f"
+            
+            new_hash=$(get_sha256 "$TMP_FILE")
+            if [[ "$original_hash" != "$new_hash" ]]; then
+                echo "Error: Checksum mismatch for $f! Original: $original_hash, New: $new_hash" >&2
+                rm -f "$TMP_FILE"
+                exit 1
+            fi
+            
+            if ! mv -f "$TMP_FILE" "$f"; then
+                echo "Error: Failed to atomically move file $f" >&2
+                rm -f "$TMP_FILE"
+                exit 1
+            fi
         fi
     done
     echo "Directory processing complete."
     exit 0
 fi
 
+# Calculate SHA256 checksum
+get_sha256() {
+    sha256sum "$1" | cut -d' ' -f1
+}
+
 # Handle single file
 echo "Converting $FILE (via $TMP)..."
+original_hash=$(get_sha256 "$FILE")
 touch "$TMP"
 chattr +C "$TMP"
+
 if ! dd if="$FILE" of="$TMP" bs=1M status=progress; then
     echo "Error: Failed to copy $FILE" >&2
     rm -f "$TMP"
     exit 1
 fi
-rm -f "$FILE"
-mv "$TMP" "$FILE"
+
+# Verify checksum
+new_hash=$(get_sha256 "$TMP")
+if [[ "$original_hash" != "$new_hash" ]]; then
+    echo "Error: Checksum mismatch! Original: $original_hash, New: $new_hash" >&2
+    rm -f "$TMP"
+    exit 1
+fi
+
+# Atomic move
+if ! mv -f "$TMP" "$FILE"; then
+    echo "Error: Failed to atomically move file" >&2
+    rm -f "$TMP"
+    exit 1
+fi
+
 echo "Conversion complete."
 exit 0
