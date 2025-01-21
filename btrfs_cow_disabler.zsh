@@ -82,4 +82,6 @@ fi
 # Handle single file
 if ! disable_cow_file "$FILE"; then
     exit 1
+else
+    exit 0
 fi
