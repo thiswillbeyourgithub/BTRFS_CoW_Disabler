@@ -10,13 +10,33 @@ log() {
     logger -t btrfs_cow_disabler "$message"
 }
 
+# New function to check for C attribute
+check_cow_attribute() {
+    local file=$1
+    if lsattr "$file" 2>/dev/null | grep -q "^....C"; then
+        return 0  # Has C attribute
+    fi
+    return 1  # Doesn't have C attribute
+}
+
 # Function to disable COW for a single file
 disable_cow_file() {
     local file=$1
     local tmp_file="${file}.tmp_cow_disable"
     
+    if [ -e "$tmp_file" ]; then
+        log "Error: Temporary file $tmp_file already exists"
+        return 1
+    fi
+
+    if check_cow_attribute "$file"; then
+        log "File $file already has COW disabled (C attribute present)"
+        return 0
+    fi
+    
     log "Converting $file..."
     
+    log "Computing hash for $file..."
     # Get original hash
     local original_hash=$(sha256sum "$file" | cut -d' ' -f1)
     
