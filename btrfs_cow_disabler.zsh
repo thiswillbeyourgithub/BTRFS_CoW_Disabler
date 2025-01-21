@@ -88,14 +88,14 @@ fi
 
 # Handle directories
 if [ -d "$FILE" ]; then
-    log "Processing directory $FILE..."
-    for f in "$FILE"/*; do
+    log "Processing directory $FILE recursively..."
+    while IFS= read -r f; do
         if [ -f "$f" ]; then
             if ! disable_cow_file "$f"; then
                 exit 1
             fi
         fi
-    done
+    done < <(find "$FILE" -type f)
     log "Directory processing complete."
     exit 0
 fi
