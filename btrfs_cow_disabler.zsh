@@ -33,8 +33,9 @@ disable_cow_file() {
     
     # Verify checksum
     local new_hash=$(sha256sum "$tmp_file" | cut -d' ' -f1)
+    log "Verifying checksum - Original: $original_hash, New: $new_hash"
     if [[ "$original_hash" != "$new_hash" ]]; then
-        log "Error: Checksum mismatch! Original: $original_hash, New: $new_hash"
+        log "Error: Checksum mismatch!"
         rm -f "$tmp_file"
         return 1
     fi
