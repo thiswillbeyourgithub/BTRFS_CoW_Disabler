@@ -52,6 +52,7 @@ disable_cow_file() {
     fi
     
     # Verify checksum
+    log "Computing check hash for $file..."
     local new_hash=$(sha256sum "$tmp_file" | cut -d' ' -f1)
     log "Verifying checksum - Original: $original_hash, New: $new_hash"
     if [[ "$original_hash" != "$new_hash" ]]; then
