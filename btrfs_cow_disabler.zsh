@@ -13,7 +13,7 @@ log() {
 # New function to check for C attribute
 check_cow_attribute() {
     local file=$1
-    if lsattr "$file" 2>/dev/null | grep -q "^....C"; then
+    if lsattr "$file" 2>/dev/null | grep -q "[[:space:]]C[[:space:]]"; then
         return 0  # Has C attribute
     fi
     return 1  # Doesn't have C attribute
