@@ -14,9 +14,9 @@ log() {
 check_cow_attribute() {
     local file=$1
     if lsattr "$file" 2>/dev/null | grep -q "[[:space:]]C[[:space:]]"; then
-        return 0  # Has C attribute
+        return 1  # Has C attribute
     fi
-    return 1  # Doesn't have C attribute
+    return 0  # Doesn't have C attribute
 }
 
 # Function to disable COW for a single file
@@ -33,6 +33,7 @@ disable_cow_file() {
         log "File $file already has COW disabled (C attribute present)"
         return 0
     fi
+    exit 0
     
     log "Converting $file..."
     
