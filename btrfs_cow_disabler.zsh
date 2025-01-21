@@ -33,7 +33,6 @@ disable_cow_file() {
         log "File $file already has COW disabled (C attribute present)"
         return 0
     fi
-    exit 0
     
     log "Converting $file..."
     
@@ -89,7 +88,21 @@ fi
 
 # Handle directories
 if [ -d "$FILE" ]; then
-    log "Processing directory $FILE recursively..."
+    log "Processing directory $FILE..."
+    
+    # Check if directory already has COW disabled
+    if check_cow_attribute "$FILE"; then
+        log "Disabling COW for directory $FILE"
+        if ! chattr +C "$FILE"; then
+            log "Error: Failed to disable COW on directory $FILE"
+            exit 1
+        fi
+        log "Successfully disabled COW for directory $FILE"
+    else
+        log "Directory $FILE already has COW disabled"
+    fi
+    
+    log "Processing files recursively..."
     while IFS= read -r f; do
         if [ -f "$f" ]; then
             if ! disable_cow_file "$f"; then
