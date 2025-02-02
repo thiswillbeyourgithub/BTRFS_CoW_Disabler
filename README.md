@@ -5,6 +5,8 @@ This script disables Copy-on-Write (COW) for files or directories on a Btrfs fil
 ## ⚠️ **Important Note**
 This script **has not been thoroughly tested** and may contain bugs. Use it at your own risk. Always back up your data before running it.
 
+**Personal Experience:** I used this script for a short period and it seemed to work fine, but I ultimately encountered issues with Btrfs itself and stopped using it in the long run. Your mileage may vary.
+
 ## Usage
 ```bash
 ./btrfs_cow_disabler.zsh <source_file_or_dir> <temporary_file>
