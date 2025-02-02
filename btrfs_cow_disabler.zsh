@@ -1,5 +1,9 @@
 #!/bin/zsh
 
+# Btrfs COW Disabler
+# Usage: ./btrfs_cow_disabler.zsh <file_or_directory>
+# Disables Copy-on-Write (COW) for files/directories on Btrfs filesystem
+
 # Exit on any error
 set -e
 
